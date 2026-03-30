@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { Topic, TestCase, SubmitResult, ScoreBreakdown } from "@/types";
 import { useApiKey } from "@/lib/ApiKeyContext";
 
@@ -31,6 +31,15 @@ export const MAX_PROMPT_LENGTH = 1200;
 
 export function usePractice() {
   const { activeKey, activeProvider } = useApiKey();
+
+  // useCallback의 stale closure 방지: ref로 최신 값 유지
+  const activeKeyRef = useRef(activeKey);
+  const activeProviderRef = useRef(activeProvider);
+  useEffect(() => {
+    activeKeyRef.current = activeKey;
+    activeProviderRef.current = activeProvider;
+  }, [activeKey, activeProvider]);
+
   const [phase, setPhase] = useState<PracticePhase>("idle");
   const [topic, setTopic] = useState<Topic | null>(null);
   const [testCases, setTestCases] = useState<TestCase[] | null>(null);
@@ -42,11 +51,11 @@ export function usePractice() {
   const [isFinalSubmitted, setIsFinalSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const providerHeaders = () => ({
-    ...(activeKey ? { "x-openai-key": activeKey } : {}),
-    "x-base-url": activeProvider.baseURL,
-    "x-model": activeProvider.model,
-  });
+  const providerHeaders = useCallback(() => ({
+    ...(activeKeyRef.current ? { "x-openai-key": activeKeyRef.current } : {}),
+    "x-base-url": activeProviderRef.current.baseURL,
+    "x-model": activeProviderRef.current.model,
+  }), []);
 
   const generateTopic = useCallback(async () => {
     setPhase("generating_topic");
