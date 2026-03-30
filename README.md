@@ -1,36 +1,72 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Prompt Arena
 
-## Getting Started
+프롬프트 엔지니어링 경진대회 연습용 GUI
 
-First, run the development server:
+AI가 랜덤 분류 태스크를 출제하고, 시스템 프롬프트를 작성해 채점받는 방식으로 프롬프트 최적화를 연습합니다.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 연습 흐름
+
+```
+Zero-shot 미니멀 프롬프트 작성
+        ↓
+채점 → 점수 확인 (정확도 + 길이)
+        ↓
+오류 패턴 파악
+        ↓
+핀포인트 보강 (Few-shot, 출력 형식 강제 등)
+        ↓
+길이 최적화 후 최종 제출
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 주요 기능
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **랜덤 주제 생성** — AI가 분류 태스크 주제와 테스트케이스 10개를 생성
+- **채점** — 작성한 시스템 프롬프트로 AI가 직접 분류, 정확도 + 길이 기반 점수 산출
+- **세션 기록** — 시도별 점수 추이를 우측 패널에서 실시간 확인
+- **최종 제출** — 최고 점수 확정 및 전체 테스트케이스 공개
+- **기록 페이지** — 주제별로 그룹핑된 제출 기록, 테스트케이스 열람 가능
+- **멀티 프로바이더** — OpenAI / Google Gemini / DeepSeek / Groq 지원
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 점수 산출 방식
 
-## Learn More
+```
+점수 = 0.9 × (정답수 / 전체케이스수) + 0.1 × (1 - 프롬프트길이 / 1200)
+```
 
-To learn more about Next.js, take a look at the following resources:
+정확도가 높을수록, 프롬프트가 짧을수록 유리합니다.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 시작하기
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+별도 설치 없이 사이트에서 바로 사용 가능합니다.
 
-## Deploy on Vercel
+1. 우측 상단 **API 키 없음** 버튼 클릭
+2. 사용할 AI 프로바이더 선택 후 API 키 입력
+3. **주제 생성** → 프롬프트 작성 → **채점하기**
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+> API 키는 브라우저 localStorage에만 저장되며 서버에 보관되지 않습니다.
+> XSS 공격에 취약할 수 있으므로 사용 후 삭제를 권장합니다.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 지원 프로바이더
+
+| 프로바이더 | 모델 |
+|---|---|
+| OpenAI | gpt-4o-mini |
+| Google Gemini | gemini-2.0-flash |
+| DeepSeek | deepseek-chat |
+| Groq | llama-3.3-70b-versatile |
+
+## 로컬 실행
+
+```bash
+npm install
+npm run dev
+```
+
+서버 측 API 키를 사용하려면 `.env.local`에 `OPENAI_API_KEY`를 설정하세요.
+
+## 기술 스택
+
+- Next.js 15 (App Router)
+- TypeScript
+- Tailwind CSS
+- openai SDK (멀티 프로바이더 호환)
