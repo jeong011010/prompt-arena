@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
 
         const actualOutput = (message.choices[0].message.content ?? "").trim();
         const passed =
-          actualOutput.toLowerCase() === tc.expectedOutput.toLowerCase();
+          actualOutput.toLowerCase() === tc.expectedOutput.trim().toLowerCase();
 
         return {
           testCaseId: tc.id,
