@@ -84,14 +84,14 @@ export function FinalResult({ bestScore, bestResults, testCases }: Props) {
                     </p>
                     <div className="flex gap-4 text-zinc-500 dark:text-zinc-400">
                       <span>
-                        정답:{" "}
+                        예상 출력:{" "}
                         <code className="font-mono text-zinc-700 dark:text-zinc-300">
                           {tc.expectedOutput}
                         </code>
                       </span>
                       {r && (
                         <span>
-                          실제:{" "}
+                          AI 출력:{" "}
                           <code
                             className={`font-mono ${
                               passed
