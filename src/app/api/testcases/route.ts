@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
     const openai = getOpenAIClient();
 
     const message = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "gpt-4.1-nano",
       max_tokens: 2048,
       messages: [
         {

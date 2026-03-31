@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     const results: SubmitResult[] = await Promise.all(
       testCases.map(async (tc) => {
         const message = await openai.chat.completions.create({
-          model: "gpt-4o-mini",
+          model: "gpt-4.1-nano",
           max_tokens: 64,
           messages: [
             { role: "system", content: systemPrompt },
