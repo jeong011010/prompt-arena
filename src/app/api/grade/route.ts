@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { getOpenAIClient } from "@/lib/openai";
 import { TestCase, SubmitResult, calculateScore } from "@/types";
 
@@ -8,17 +10,19 @@ interface GradeRequest {
 }
 
 export async function POST(req: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.email) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     const { systemPrompt, testCases }: GradeRequest = await req.json();
-    const clientKey = req.headers.get("x-openai-key") ?? undefined;
-    const baseURL = req.headers.get("x-base-url") ?? undefined;
-    const model = req.headers.get("x-model") ?? "gpt-4o-mini";
-    const openai = getOpenAIClient(clientKey, baseURL);
+    const openai = getOpenAIClient();
 
     const results: SubmitResult[] = await Promise.all(
       testCases.map(async (tc) => {
         const message = await openai.chat.completions.create({
-          model,
+          model: "gpt-4o-mini",
           max_tokens: 64,
           messages: [
             { role: "system", content: systemPrompt },

@@ -1,17 +1,19 @@
 "use client";
 
-import { useCallback } from "react";
-import { usePractice } from "./hooks/usePractice";
+import { ConfirmModal } from "@/components/shared/ConfirmModal";
 import { useHistory } from "@/features/history/hooks/useHistory";
-import { TopicCard } from "./components/TopicCard";
-import { PromptEditor } from "./components/PromptEditor";
-import { GradeResult } from "./components/GradeResult";
-import { SessionHistory } from "./components/SessionHistory";
+import { useCallback, useState } from "react";
 import { FinalResult } from "./components/FinalResult";
+import { GradeResult } from "./components/GradeResult";
+import { PromptEditor } from "./components/PromptEditor";
+import { SessionHistory } from "./components/SessionHistory";
+import { TopicCard } from "./components/TopicCard";
+import { usePractice } from "./hooks/usePractice";
 
 export function PracticeView() {
   const {
     phase,
+    topics,
     topic,
     testCases,
     prompt,
@@ -23,11 +25,24 @@ export function PracticeView() {
     isFinalSubmitted,
     error,
     generateTopic,
+    selectTopic,
     submitPrompt,
     finalSubmit,
   } = usePractice();
 
   const { saveRound } = useHistory();
+  const [showNewTopicConfirm, setShowNewTopicConfirm] = useState(false);
+
+  const isInProgress =
+    phase === "ready" || phase === "grading" || phase === "graded";
+
+  const handleGenerateTopic = useCallback(() => {
+    if (isInProgress) {
+      setShowNewTopicConfirm(true);
+    } else {
+      generateTopic();
+    }
+  }, [isInProgress, generateTopic]);
 
   const handleSubmit = useCallback(async () => {
     if (!topic || !testCases) return;
@@ -51,68 +66,86 @@ export function PracticeView() {
 
   const isLoading =
     phase === "generating_topic" ||
+    phase === "selecting_topic" ||
     phase === "generating_cases" ||
     phase === "grading";
 
   const canSubmit = (phase === "ready" || phase === "graded") && !isFinalSubmitted;
 
   return (
-    <div className="flex gap-5 items-start">
-      {/* 메인 영역 */}
-      <div className="flex-1 min-w-0 space-y-4">
-        <TopicCard
-          topic={topic}
-          testCases={testCases}
-          phase={phase}
-          onGenerate={generateTopic}
-        />
-
-        {error && (
-          <div className="rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 px-4 py-3 text-sm text-red-600 dark:text-red-400">
-            {error}
-          </div>
-        )}
-
-        {topic && testCases && !isFinalSubmitted && (
-          <PromptEditor
-            prompt={prompt}
-            onChange={setPrompt}
-            onSubmit={handleSubmit}
-            submitCount={submitCount}
-            disabled={isLoading || !canSubmit}
-            isGrading={phase === "grading"}
-          />
-        )}
-
-        {isFinalSubmitted && bestResult && testCases ? (
-          <FinalResult
-            bestScore={bestResult.score}
-            bestResults={bestResult.results}
+    <>
+      <div className="flex gap-5 items-start">
+        {/* 메인 영역 */}
+        <div className="flex-1 min-w-0 space-y-4">
+          <TopicCard
+            topic={topic}
+            topics={topics}
             testCases={testCases}
+            phase={phase}
+            onGenerate={handleGenerateTopic}
+            onSelectTopic={selectTopic}
           />
-        ) : (
-          latestResult && !isFinalSubmitted && (
-            <GradeResult
-              results={latestResult.results}
-              score={latestResult.score}
-              bestScore={bestResult?.score.total ?? null}
+
+          {error && (
+            <div className="rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 px-4 py-3 text-sm text-red-600 dark:text-red-400">
+              {error}
+            </div>
+          )}
+
+          {topic && testCases && !isFinalSubmitted && (
+            <PromptEditor
+              prompt={prompt}
+              onChange={setPrompt}
+              onSubmit={handleSubmit}
               submitCount={submitCount}
+              disabled={isLoading || !canSubmit}
+              isGrading={phase === "grading"}
             />
-          )
+          )}
+
+          {isFinalSubmitted && bestResult && testCases ? (
+            <FinalResult
+              bestScore={bestResult.score}
+              bestResults={bestResult.results}
+              testCases={testCases}
+            />
+          ) : (
+            latestResult && !isFinalSubmitted && (
+              <GradeResult
+                results={latestResult.results}
+                score={latestResult.score}
+                bestScore={bestResult?.score.total ?? null}
+                submitCount={submitCount}
+              />
+            )
+          )}
+        </div>
+
+        {/* 우측 세션 기록 패널 */}
+        {topic && (
+          <div className="w-56 shrink-0">
+            <SessionHistory
+              rounds={sessionRounds}
+              totalCases={testCases?.length ?? 0}
+              onFinalSubmit={finalSubmit}
+              isFinalSubmitted={isFinalSubmitted}
+            />
+          </div>
         )}
       </div>
 
-      {/* 우측 세션 기록 패널 */}
-      {topic && (
-        <div className="w-56 shrink-0">
-          <SessionHistory
-            rounds={sessionRounds}
-            totalCases={testCases?.length ?? 0}
-            onFinalSubmit={finalSubmit}
-            isFinalSubmitted={isFinalSubmitted}
-          />
-        </div>
+      {showNewTopicConfirm && (
+        <ConfirmModal
+          title="새 주제를 생성할까요?"
+          message="이미 오늘 횟수 1회가 차감되었으며, 진행 중인 라운드가 초기화됩니다. 계속하시겠어요?"
+          confirmLabel="새 주제 생성"
+          onConfirm={() => {
+            setShowNewTopicConfirm(false);
+            generateTopic();
+          }}
+          onCancel={() => setShowNewTopicConfirm(false)}
+        />
       )}
-    </div>
+    </>
   );
 }
