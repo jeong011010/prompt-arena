@@ -2,6 +2,7 @@
 
 import { ConfirmModal } from "@/components/shared/ConfirmModal";
 import { useHistory } from "@/features/history/hooks/useHistory";
+import { useUsage } from "@/lib/UsageContext";
 import { useCallback, useState } from "react";
 import { FinalResult } from "./components/FinalResult";
 import { GradeResult } from "./components/GradeResult";
@@ -31,6 +32,8 @@ export function PracticeView() {
   } = usePractice();
 
   const { saveRound } = useHistory();
+  const { usage } = useUsage();
+  const isUsageExhausted = usage !== null && usage.count >= usage.limit;
   const [showNewTopicConfirm, setShowNewTopicConfirm] = useState(false);
 
   const isInProgress =
@@ -82,6 +85,7 @@ export function PracticeView() {
             topics={topics}
             testCases={testCases}
             phase={phase}
+            isUsageExhausted={isUsageExhausted}
             onGenerate={handleGenerateTopic}
             onSelectTopic={selectTopic}
           />

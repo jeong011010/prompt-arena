@@ -70,7 +70,7 @@ export const MAX_SUBMIT = 20;
 export const MAX_PROMPT_LENGTH = 1200;
 
 export function usePractice() {
-  const { refresh: refreshUsage } = useUsage();
+  const { usage, refresh: refreshUsage } = useUsage();
 
   const [phase, setPhase] = useState<PracticePhase>("idle");
   const [topics, setTopics] = useState<Topic[]>([]);
@@ -154,6 +154,10 @@ export function usePractice() {
   }, []);
 
   const generateTopic = useCallback(async () => {
+    if (usage && usage.count >= usage.limit) {
+      setError(`오늘 사용 횟수를 모두 소진했습니다 (${usage.limit}/${usage.limit})`);
+      return;
+    }
     setError(null);
     setPhase("generating_topic");
     setTopics([]);
@@ -176,7 +180,7 @@ export function usePractice() {
       setError(e instanceof Error ? e.message : "주제 생성 실패");
       setPhase("idle");
     }
-  }, []);
+  }, [usage]);
 
   const selectTopic = useCallback(
     async (t: Topic) => {

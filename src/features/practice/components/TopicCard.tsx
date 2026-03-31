@@ -8,11 +8,12 @@ interface Props {
   topics: Topic[];
   testCases: TestCase[] | null;
   phase: string;
+  isUsageExhausted: boolean;
   onGenerate: () => void;
   onSelectTopic: (topic: Topic) => void;
 }
 
-export function TopicCard({ topic, topics, testCases, phase, onGenerate, onSelectTopic }: Props) {
+export function TopicCard({ topic, topics, testCases, phase, isUsageExhausted, onGenerate, onSelectTopic }: Props) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const isLoadingTopic = phase === "generating_topic";
@@ -84,8 +85,9 @@ export function TopicCard({ topic, topics, testCases, phase, onGenerate, onSelec
         </h2>
         <button
           onClick={onGenerate}
-          disabled={isLoadingCases}
+          disabled={isLoadingCases || isUsageExhausted}
           className="text-sm px-3 py-1.5 rounded-lg bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-medium hover:opacity-80 disabled:opacity-40 transition-opacity"
+          title={isUsageExhausted ? "오늘 사용 횟수를 모두 소진했습니다" : undefined}
         >
           {isLoadingCases ? "케이스 생성 중…" : topic ? "새 주제 생성" : "주제 생성"}
         </button>
