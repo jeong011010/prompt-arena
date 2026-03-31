@@ -74,7 +74,7 @@ export function PracticeView() {
 
   return (
     <>
-      <div className="flex gap-5 items-start">
+      <div className="flex flex-col md:flex-row gap-5 items-start">
         {/* 메인 영역 */}
         <div className="flex-1 min-w-0 space-y-4">
           <TopicCard
@@ -123,7 +123,7 @@ export function PracticeView() {
 
         {/* 우측 세션 기록 패널 */}
         {topic && (
-          <div className="w-56 shrink-0">
+          <div className="w-full md:w-56 md:shrink-0">
             <SessionHistory
               rounds={sessionRounds}
               totalCases={testCases?.length ?? 0}

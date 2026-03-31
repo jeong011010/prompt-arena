@@ -16,7 +16,7 @@ export function LoginGate({ children }: { children: React.ReactNode }) {
   if (!session) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-950">
-        <div className="text-center space-y-4">
+        <div className="text-center space-y-4 px-4">
           <div>
             <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">Prompt Arena</h1>
             <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">

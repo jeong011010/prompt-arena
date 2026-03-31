@@ -14,7 +14,7 @@ export function SessionHistory({ rounds, totalCases, onFinalSubmit, isFinalSubmi
   const bestScore = rounds.length > 0 ? Math.max(...rounds.map((r) => r.score.total)) : null;
 
   return (
-    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 space-y-3 sticky top-4">
+    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 space-y-3 w-full md:sticky md:top-4">
       <div className="flex items-center justify-between">
         <h2 className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
           이번 세션 기록
@@ -38,13 +38,13 @@ export function SessionHistory({ rounds, totalCases, onFinalSubmit, isFinalSubmi
           채점 결과가 여기에 쌓입니다
         </p>
       ) : (
-        <div className="space-y-1.5 max-h-80 overflow-y-auto">
+        <div className="flex md:flex-col gap-1.5 overflow-x-auto md:overflow-x-visible md:max-h-80 md:overflow-y-auto pb-1 md:pb-0">
           {[...rounds].reverse().map((r) => {
             const isBest = r.score.total === bestScore;
             return (
               <div
                 key={r.round}
-                className={`rounded-lg px-3 py-2 text-xs ${
+                className={`rounded-lg px-3 py-2 text-xs shrink-0 md:shrink ${
                   isBest
                     ? "bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800"
                     : "bg-zinc-50 dark:bg-zinc-800"
